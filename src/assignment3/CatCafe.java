@@ -438,9 +438,9 @@ public class CatCafe implements Iterable<Cat> {
 			}
 			else if (toRemove.junior == null) {
 				// Set right node as toRemove (there is no left node)
-				CatNode parent = toRemove.parent;
-				parent.senior = toRemove.senior;
-				toRemove.senior.parent = parent;
+				CatNode parent = root.parent;
+				parent.senior = root.senior;
+				root.senior.parent = parent;
 			}
 			else { // There are two children
 
@@ -448,7 +448,7 @@ public class CatCafe implements Iterable<Cat> {
 				CatNode oldestCat = findCat(toRemove, findYoungest(toRemove.junior));
 
 				// Keep track of toRemove's parent
-				CatNode rmParent = toRemove.parent;
+				CatNode rmParent = root.parent;
 
 				// Make sure toRemove isn't top node/root
 				if (rmParent == null) { // oldest cat becomes the head, because toRemove is the root node of the cafe
@@ -458,7 +458,7 @@ public class CatCafe implements Iterable<Cat> {
 
 					// oldestCat will always be a senior node, unless it is directly under toRemove
 					if (oldestCat.parent.catEmployee.equals(toRemove.catEmployee)) {
-						toRemove.junior = null; // this isn't really necessary, but will free up memory (hopefully)
+						root.junior = null; // this isn't really necessary, but will free up memory (hopefully)
 					}
 					else { // it is some senior node in the left subtree of toRemove
 						// set its parent link to oldestCat to null
@@ -471,7 +471,7 @@ public class CatCafe implements Iterable<Cat> {
 					oldestCat.parent = rmParent;
 
 					// Figure out if toRemove is the left or right node of its parent
-					if (toRemove.catEmployee.equals(toRemove.parent.junior.catEmployee)) {
+					if (root.catEmployee.equals(root.parent.junior.catEmployee)) {
 						// it is the junior node, so oldestCat must become the junior node of toRemove's parent
 						rmParent.junior = oldestCat;
 					}
@@ -483,11 +483,11 @@ public class CatCafe implements Iterable<Cat> {
 			}
 		}
 		else {
-			if (toRemove.catEmployee.compareTo(root.catEmployee) > 0) { // toRemove has seniority, so we search right subtree
-				bstRemove(root.senior, toRemove);
+			if (root.catEmployee.compareTo(root.catEmployee) > 0) { // toRemove has seniority, so we search right subtree
+				root.senior = bstRemove(root.senior, toRemove);
 			}
 			else { // root has seniority, so we search the left subtree
-				bstRemove(root.junior, toRemove);
+				root.junior = bstRemove(root.junior, toRemove);
 			}
 		}
 
