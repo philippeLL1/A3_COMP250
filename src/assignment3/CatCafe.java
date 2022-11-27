@@ -442,12 +442,44 @@ public class CatCafe implements Iterable<Cat> {
 				parent.senior = toRemove.senior;
 				toRemove.senior.parent = parent;
 			}
-			else {
-				// There are two children
+			else { // There are two children
+
 				// findMostSenior in toRemove.junior, set that as the new toRemove
 				CatNode oldestCat = findCat(toRemove, findYoungest(toRemove.junior));
 
+				// Keep track of toRemove's parent
+				CatNode rmParent = toRemove.parent;
 
+				// Make sure toRemove isn't top node/root
+				if (rmParent == null) { // oldest cat becomes the head, because toRemove is the root node of the cafe
+					this.root = oldestCat;
+				}
+				else { // oldestCat will take on an inner node position
+
+					// oldestCat will always be a senior node, unless it is directly under toRemove
+					if (oldestCat.parent.catEmployee.equals(toRemove.catEmployee)) {
+						toRemove.junior = null; // this isn't really necessary, but will free up memory (hopefully)
+					}
+					else { // it is some senior node in the left subtree of toRemove
+						// set its parent link to oldestCat to null
+						oldestCat.parent.senior = null;
+					}
+
+					// TODO: Take care of oldestCat's children
+
+					// Set the new parent for oldestCat
+					oldestCat.parent = rmParent;
+
+					// Figure out if toRemove is the left or right node of its parent
+					if (toRemove.catEmployee.equals(toRemove.parent.junior.catEmployee)) {
+						// it is the junior node, so oldestCat must become the junior node of toRemove's parent
+						rmParent.junior = oldestCat;
+					}
+					else {
+						// toRemove if the senior node, oldestCat becomes senior to toRemove.parent
+						rmParent.senior = oldestCat;
+					}
+				}
 			}
 		}
 		else {
