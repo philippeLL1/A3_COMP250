@@ -20,17 +20,42 @@ public class personalTester {
 
         // Test CatNode.hire
         CatCafe cafe = new CatCafe();
-        cafe.hire(BC);
+        cafe.hire(JTO);
+        Printer p1 = new Printer(cafe.root, 0);
+        p1.printTree();
+        //printTree(cafe.root, 0);
+        //System.out.println("~~~~~~~~~~~~~~~~~~~");
+        cafe.hire(C);
+        Printer p2 = new Printer(cafe.root, 0);
+        p2.printTree();
+        //printTree(cafe.root, 0);
+        //System.out.println("~~~~~~~~~~~~~~~~~~~");
+        cafe.hire(JJ);
+        Printer p3 = new Printer(cafe.root, 0);
+        p3.printTree();
+        //printTree(cafe.root, 0);
+        //System.out.println("~~~~~~~~~~~~~~~~~~~");
         cafe.hire(J);
-        cafe.hire(L);
-        cafe.hire(B);
+        Printer p4 = new Printer(cafe.root, 0);
+        p4.printTree();
+       // printTree(cafe.root, 0);
+       // System.out.println("~~~~~~~~~~~~~~~~~~~");
+        cafe.hire(MrsN);
+        Printer p5 = new Printer(cafe.root, 0);
+        p5.printTree();
+        //	cafe.hire(new Cat("Blofeld’s cat", 6, 72, 18, 120.0));
+        //	cafe.hire(new Cat("Lucifer", 10, 44, 20, 50.0));
+       // printTree(cafe.root, 0);
+       // System.out.println("~~~~~~~~~~~~~~~~~~~");
+
+        //cafe.bstRemove(cafe.root, cafe.root.senior);
+
+
 
 //        for (Cat m : cafe) {
 //            System.out.println(m);
 //        }
 
-        Printer tree = new Printer(cafe.root, 0);
-        tree.printTree();
     }
 
 

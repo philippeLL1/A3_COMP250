@@ -139,17 +139,7 @@ public class CatCafe implements Iterable<Cat> {
 		public Cat findMostSenior() {
 			return findEldest(this);
 		}
-		// HELPER METHOD FOR findMostSenior
-		private static Cat findEldest(CatNode node) {
-			// Base case
-			if (node.senior == null) {
-				// No junior, so it is the most junior
-				return node.catEmployee;
-			}
-			else { // recursive step
-				return findEldest(node.senior);
-			}
-		}
+
 
 		// find the cat with the lowest seniority in the tree rooted at this
 		public Cat findMostJunior() {
@@ -193,7 +183,7 @@ public class CatCafe implements Iterable<Cat> {
 			// Assign it to the field
 
 		}
-		// HELPER METHOD FOR CONSTRUCTOR -- CHANGE THISSSSSSSSS
+		// HELPER METHOD FOR CONSTRUCTOR -- CHANGE THISSSSSSSSS it has to be in the CatCafe I think
 		private CatNode findFirstNode(CatNode root) {
 			// Base case
 			if (root.junior == null) {
@@ -273,6 +263,18 @@ public class CatCafe implements Iterable<Cat> {
 		}
 	}
 
+	// HELPER METHOD FOR findMostSenior
+	private static Cat findEldest(CatNode node) {
+		// Base case
+		if (node.senior == null) {
+			// No junior, so it is the most junior
+			return node.catEmployee;
+		}
+		else { // recursive step
+			return findEldest(node.senior);
+		}
+	}
+
 	// Find a Cat c in a tree rooted at CatNode root
 	private static CatNode findCat(CatNode root, Cat c) {
 
@@ -296,7 +298,6 @@ public class CatCafe implements Iterable<Cat> {
 
 		if (pivot.parent.junior != null && pivot.parent.junior.catEmployee.equals(pivot.catEmployee)) {
 			// The pivot is the left child of its parent. We rotate right
-
 			// Step 1:
 			root.junior = pivot.senior;
 
@@ -310,8 +311,13 @@ public class CatCafe implements Iterable<Cat> {
 
 			// Step 4: if there is a root above root & pivot, we must set its pointers
 			if (root.parent != null) {
-				// Set its senior, because we are rotating left (?)
-				root.parent.junior = pivot;
+				// Depending on the position of root, we set the corresponding branch to the pivot
+				if (isJunior(root)) {
+					root.parent.junior = pivot;
+				}
+				else {
+					root.parent.senior = pivot;
+				}
 			}
 
 		}
@@ -331,8 +337,15 @@ public class CatCafe implements Iterable<Cat> {
 
 			// Step 4: if there is a root above root & pivot, we must set its pointers
 			if (root.parent != null) {
-				// Set its senior, because we are rotating left (?)
-				root.parent.senior = pivot;
+
+				// Depending on the position of root, we set the corresponding branch to the pivot
+				if (isJunior(root)) {
+					root.parent.junior = pivot;
+				}
+				else {
+					root.parent.senior = pivot;
+				}
+
 			}
 
 
@@ -414,80 +427,138 @@ public class CatCafe implements Iterable<Cat> {
 	}
 	//--------------------------------------------------------
 
-	private CatNode bstRemove(CatNode root, CatNode toRemove) {
+	// Helpers for CatNode.retire()
+	public CatNode bstRemove(CatNode root, CatNode toRemove) {
 
-		// Base Case
-		if (root == null) {
-			return null;
-		}
-		else if (root.equals(toRemove)) {
-			if (toRemove.senior == null && toRemove.junior == null) {
-				// A leaf, just remove the parent's connection to it
-				if (toRemove.parent.junior.catEmployee.equals(toRemove.catEmployee)) { // toRemove is the junior of its parent
-					toRemove.parent.junior = null;
+		// Base Case -> when we meet toRemove
+		if (root.catEmployee.equals(toRemove.catEmployee)) {
+
+			if (toRemove.senior == null && toRemove.junior == null) { // Case 1: the node to remove has no children
+
+				// Set the correct branch of toRemove's parent to null
+				if (isJunior(root)) { // toRemove is the junior of its parent
+					root.parent.junior = null;
 				}
 				else  { // toRemove is the senior of its parent
-					toRemove.parent.senior = null;
+					root.parent.senior = null;
 				}
-			}
-			else if (toRemove.senior == null) {
-				// Set left node as toRemove (there is no right node)
-				CatNode parent = toRemove.parent;
-				parent.junior = toRemove.junior;
-				toRemove.junior.parent = parent;
-			}
-			else if (toRemove.junior == null) {
-				// Set right node as toRemove (there is no left node)
-				CatNode parent = root.parent;
-				parent.senior = root.senior;
-				root.senior.parent = parent;
-			}
-			else { // There are two children
 
-				// findMostSenior in toRemove.junior, set that as the new toRemove
-				CatNode oldestCat = findCat(toRemove, findYoungest(toRemove.junior));
+				// disconnect toRemove from its parent
+				root.parent = null;
+
+				// set root to null
+				root = null;
+
+			}
+			else if (toRemove.senior == null) { // Case 2: the node toRemove has 1 child -> a junior
+				// Move toRemove's junior child up to toRemove's parent's corresponding branch
+				CatNode parent = root.parent;
+
+				if (isJunior(root)) {
+					parent.junior = root.junior;
+				}
+				else {
+					parent.senior = toRemove.junior;
+				}
+
+				root.junior.parent = parent;
+
+				root = root.junior;
+			}
+			else if (toRemove.junior == null) { // Case 3: the node to toRemove has 1 child -> a senior
+
+				CatNode parent = root.parent;
+
+				if (isJunior(root)) {
+					parent.junior = root.senior;
+				}
+				else {
+					parent.senior = root.senior;
+				}
+
+				root.senior.parent = parent;
+
+				root = root.senior;
+			}
+			else { // Case 4: there are two children -> one junior and one senior
+
+				// findMostSenior in toRemove.junior. It will take toRemove's place
+				CatNode oldestCat = findCat(toRemove, findEldest(toRemove.junior));
 
 				// Keep track of toRemove's parent
 				CatNode rmParent = root.parent;
 
-				// Make sure toRemove isn't top node/root
-				if (rmParent == null) { // oldest cat becomes the head, because toRemove is the root node of the cafe
-					this.root = oldestCat;
-				}
-				else { // oldestCat will take on an inner node position
+				// The senior can either be the junior to toRemove or be a senior to a sub tree
+				// make sure it exists
+				// find if toRemove is a junior or a senior
+				// Set oldestCat's parent branch
+				// if it doesn't, oldestCat becomes the root
+				if (oldestCat.parent.catEmployee.equals(toRemove.catEmployee)) { // Case 1: oldest cat is directly under toRemove
+					// It will simply take its place, no need to rearrange the tree yet
 
-					// oldestCat will always be a senior node, unless it is directly under toRemove
-					if (oldestCat.parent.catEmployee.equals(toRemove.catEmployee)) {
-						root.junior = null; // this isn't really necessary, but will free up memory (hopefully)
+					oldestCat.senior = toRemove.senior; // take the right branch of toRemove
+				}
+				else { // Case 2: oldest cat is the senior to some subtree under toRemove
+
+					// Step 1: Connect oldestCat's junior branch to the senior branch of oldestCat's parent
+					if (oldestCat.junior != null) {
+						oldestCat.junior.parent = oldestCat.parent; // set the parent
+						oldestCat.parent.senior = oldestCat.junior; // set the child
 					}
-					else { // it is some senior node in the left subtree of toRemove
-						// set its parent link to oldestCat to null
+					else {
+						// disconnect oldestCat from its parent, set the parent senior field to null
 						oldestCat.parent.senior = null;
 					}
 
-					// TODO: Take care of oldestCat's children
+					// Step 2: Connect oldestCat to toRemove's children
+					oldestCat.junior = toRemove.junior; // junior branch
+					oldestCat.senior = toRemove.senior; // senior branch
+					oldestCat.junior.parent = oldestCat; // junior parent branch
+					oldestCat.senior.parent = oldestCat; // senior parent branch
 
-					// Set the new parent for oldestCat
-					oldestCat.parent = rmParent;
 
-					// Figure out if toRemove is the left or right node of its parent
-					if (root.catEmployee.equals(root.parent.junior.catEmployee)) {
-						// it is the junior node, so oldestCat must become the junior node of toRemove's parent
-						rmParent.junior = oldestCat;
+				}
+				if (toRemove.parent != null) { // All cases: Connect toRemove's parent to oldestCat
+
+					// We must know if toRemove was connected to the junior or senior branch of its parent
+					if (isJunior(toRemove)) { // toRemove was connected to the junior node
+						toRemove.parent.junior = oldestCat;
 					}
 					else {
-						// toRemove if the senior node, oldestCat becomes senior to toRemove.parent
-						rmParent.senior = oldestCat;
+						toRemove.parent.senior = oldestCat;
 					}
+
+					// Connect oldestCat to its parent
+					oldestCat.parent = toRemove.parent;
 				}
+				else {
+					// oldestCat becomes the root of the whole tree
+					this.root = oldestCat;
+					oldestCat.parent = null;
+				}
+				root = oldestCat;
 			}
 		}
-		else {
-			if (root.catEmployee.compareTo(root.catEmployee) > 0) { // toRemove has seniority, so we search right subtree
+		else { // Recursive step
+
+			if (toRemove.catEmployee.compareTo(root.catEmployee) > 0) { // toRemove has seniority, so we search right subtree
 				root.senior = bstRemove(root.senior, toRemove);
+
+				// If we haven't removed the root's senior, we want to add it back to the tree
+				if (root.senior != null) {
+					root.senior.parent = root;
+				}
+
 			}
 			else { // root has seniority, so we search the left subtree
+
 				root.junior = bstRemove(root.junior, toRemove);
+
+				// If we haven't removed the root's senior, we want to add it back to the tree
+				if (root.junior != null) {
+					root.junior.parent = root;
+				}
+
 			}
 		}
 
@@ -495,6 +566,14 @@ public class CatCafe implements Iterable<Cat> {
 		return root;
 	}
 
+
+	// Helper for bstRemove
+	private boolean isJunior(CatNode cat) {
+		if (cat.parent == null) {
+			return false;
+		}
+		else return cat.parent.junior == cat;
+	}
 
 	// Helper for shallow copy constructor
 	private void shallowCopy(CatNode root) {
