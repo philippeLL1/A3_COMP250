@@ -14,7 +14,7 @@ class test_hire_1 implements Runnable{
         cafe.hire(A);
         cafe.hire(B);
 
-        if (!cafe.root.senior.catEmployee.equals(B) && cafe.root.catEmployee.equals(A)){
+        if (!(cafe.root.senior.catEmployee.equals(B) && cafe.root.catEmployee.equals(A))){
             throw new AssertionError("CatB should be junior of CatA and CatA is the root");
         };
         System.out.println("Test passed.");
@@ -32,7 +32,7 @@ class test_hire_2 implements Runnable{
         cafe.hire(A);
         cafe.hire(B);
 
-        if (!cafe.root.junior.catEmployee.equals(B) && cafe.root.catEmployee.equals(A)){
+        if (!(cafe.root.junior.catEmployee.equals(B) && cafe.root.catEmployee.equals(A))){
             throw new AssertionError("B should be senior of A and A is the root");
         }
         System.out.println("Test passed.");
@@ -51,7 +51,7 @@ class test_hire_3 implements Runnable{
         cafe.hire(B);
         cafe.hire(C);
 
-        if (!cafe.root.catEmployee.equals(A) && cafe.root.senior.catEmployee.equals(B)&&cafe.root.senior.senior.catEmployee.equals(C)){
+        if (!(cafe.root.catEmployee.equals(A) && cafe.root.senior.catEmployee.equals(B)&&cafe.root.senior.senior.catEmployee.equals(C))){
             throw new AssertionError("catC should be senior of catB and catB should be senior of catA");
         }
         System.out.println("Test passed.");
@@ -70,7 +70,7 @@ class test_hire_4 implements Runnable{
         cafe.hire(B);
         cafe.hire(C);
 
-        if (!cafe.root.catEmployee.equals(A) && cafe.root.junior.catEmployee.equals(B) && cafe.root.junior.junior.catEmployee.equals(C)) {
+        if (!(cafe.root.catEmployee.equals(A) && cafe.root.junior.catEmployee.equals(B) && cafe.root.junior.junior.catEmployee.equals(C))) {
             throw new AssertionError("catC should be junior of catB and catB should be junior of catA");
         }
         System.out.println("Test passed.");
@@ -89,7 +89,7 @@ class test_hire_5 implements Runnable{
         cafe.hire(B);
         cafe.hire(C);
 
-        if (!cafe.root.catEmployee.equals(A) && cafe.root.senior.catEmployee.equals(C) && cafe.root.senior.junior.catEmployee.equals(B)) {
+        if (!(cafe.root.catEmployee.equals(A) && cafe.root.senior.catEmployee.equals(C) && cafe.root.senior.junior.catEmployee.equals(B))) {
             throw new AssertionError("Cat B should be junior of catC and cat C should be senior of catA");
         }
         System.out.println("Test passed.");
@@ -108,7 +108,7 @@ class test_retire_1 implements Runnable{
         cafe.hire(B);
         cafe.retire(B);
 
-        if (!cafe.root.catEmployee.equals(A) && cafe.root.senior==null && cafe.root.junior==null) {
+        if (!(cafe.root.catEmployee.equals(A) && cafe.root.senior==null && cafe.root.junior==null)) {
             throw new AssertionError("Cat A should be only cat left in the tree");
         }
         System.out.println("Test passed.");
@@ -127,7 +127,7 @@ class test_retire_2 implements Runnable{
         cafe.hire(B);
         cafe.retire(B);
 
-        if (!cafe.root.catEmployee.equals(A) && cafe.root.senior==null && cafe.root.junior==null) {
+        if (!(cafe.root.catEmployee.equals(A) && cafe.root.senior==null && cafe.root.junior==null)) {
             throw new AssertionError("Cat A should be only cat left in the tree");
         }
         System.out.println("Test passed.");
@@ -148,7 +148,7 @@ class test_retire_3 implements Runnable{
         cafe.hire(C);
         cafe.retire(B);
 
-        if (!cafe.root.catEmployee.equals(A) && cafe.root.senior.catEmployee.equals(C) && cafe.root.senior.junior==null && cafe.root.senior.senior==null) {
+        if (!(cafe.root.catEmployee.equals(A) && cafe.root.senior.catEmployee.equals(C) && cafe.root.senior.junior==null && cafe.root.senior.senior==null)) {
             throw new AssertionError("There should only be 2 cats in the tree with A as root and C senior of A");
         }
         System.out.println("Test passed.");
@@ -169,7 +169,7 @@ class test_retire_4 implements Runnable{
         cafe.hire(C);
         cafe.retire(B);
 
-        if (!cafe.root.catEmployee.equals(A) && cafe.root.junior.catEmployee.equals(C) && cafe.root.junior.senior==null && cafe.root.junior.junior == null){
+        if (!(cafe.root.catEmployee.equals(A) && cafe.root.junior.catEmployee.equals(C) && cafe.root.junior.senior==null && cafe.root.junior.junior == null)){
             throw new AssertionError("There should only be 2 cats in the tree with A as root and C junior of A");
         }
         System.out.println("Test passed.");
@@ -188,7 +188,7 @@ class test_retire_5 implements Runnable{
         cafe.hire(B);
         cafe.retire(A);
 
-        if (!cafe.root.catEmployee.equals(B) && cafe.root.junior == null && cafe.root.senior==null){
+        if (!(cafe.root.catEmployee.equals(B) && cafe.root.junior == null && cafe.root.senior==null)){
             throw new AssertionError("Cat B should be only cat left in the tree");
         }
         System.out.println("Test passed.");
@@ -207,7 +207,7 @@ class test_retire_6 implements Runnable {
         cafe.hire(B);
         cafe.retire(A);
 
-        if (!cafe.root.catEmployee.equals(B) && cafe.root.junior == null && cafe.root.senior == null) {
+        if (!(cafe.root.catEmployee.equals(B) && cafe.root.junior == null && cafe.root.senior == null)) {
             throw new AssertionError("Cat B should be only cat left in the tree");
         }
         System.out.println("Test passed.");
@@ -251,7 +251,7 @@ class test_find_most_junior_2 implements Runnable{
         cafe.hire(B);
         cafe.hire(C);
 
-        if (!cafe.root.findMostJunior().equals(A)){
+        if (!(cafe.root.findMostJunior().equals(A))){
             throw new AssertionError("Test failed when most junior cat is the root (A)");
         }
         System.out.println("Test passed.");
@@ -271,7 +271,7 @@ class test_find_most_junior_3 implements Runnable{
         cafe.hire(B);
         cafe.hire(C);
 
-        if (!cafe.root.findMostJunior().equals(C)){
+        if (!(cafe.root.findMostJunior().equals(C))){
             throw new AssertionError("Test failed when root.junior == null, most junior cat is C");
         }
         System.out.println("Test passed.");
@@ -292,7 +292,7 @@ class test_find_most_senior_1 implements Runnable{
         cafe.hire(B);
         cafe.hire(C);
 
-        if (!cafe.root.findMostSenior().equals(C)){
+        if (!(cafe.root.findMostSenior().equals(C))){
             throw new AssertionError("Test failed when most senior cat is C but got "+ cafe.root.findMostJunior().toString());
         }
         System.out.println("Test passed.");
@@ -312,7 +312,7 @@ class test_find_most_senior_2 implements Runnable{
         cafe.hire(B);
         cafe.hire(C);
 
-        if (!cafe.root.findMostSenior().equals(A)){
+        if (!(cafe.root.findMostSenior().equals(A))){
             throw new AssertionError("Test failed when most senior cat is at the root");
         }
         System.out.println("Test passed.");
@@ -332,7 +332,7 @@ class test_find_most_senior_3 implements Runnable{
         cafe.hire(B);
         cafe.hire(C);
 
-        if (!cafe.root.findMostSenior().equals(C)){
+        if (!(cafe.root.findMostSenior().equals(C))){
             throw new AssertionError("Test failed when root.senior == null, most senior cat is C but got "+cafe.root.findMostSenior().toString());
         }
         System.out.println("Test passed.");
@@ -357,7 +357,7 @@ class test_build_hof_1 implements Runnable{
 
         ArrayList<Cat> ans = cafe.buildHallOfFame(3);
         for (int i =0; i<3; i+=1){
-            if (!ans.get(i).equals(res.get(i))){
+            if (!(ans.get(i).equals(res.get(i)))){
                 throw new AssertionError("Test failed when building hall of fame");
             }
         }
@@ -387,7 +387,7 @@ class test_build_hof_2 implements Runnable{
 
         ArrayList<Cat> ans = cafe.buildHallOfFame(3);
         for (int i =0; i<3; i+=1){
-            if (!ans.get(i).equals(res.get(i))){
+            if (!(ans.get(i).equals(res.get(i)))){
                 throw new AssertionError("Test failed when numOfCatsToHonor less than number of cats in cafe ");
             }
         }
@@ -465,7 +465,7 @@ class test_get_grooming_schedule_1 implements Runnable{
             ArrayList<Cat> resW = res.get(i);
 
             for (int j=0; j<ansW.size(); j++) {
-                if (!ansW.get(j).equals(resW.get(j))) {
+                if (!(ansW.get(j).equals(resW.get(j)))) {
                     throw new AssertionError("Test failed for grooming schedule. Expected "+ ansW.toString() +
                             " in week " + i + " but got " + resW.toString());
 

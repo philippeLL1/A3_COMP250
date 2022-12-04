@@ -4,6 +4,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+// Author: Philippe Latour
+// Student ID: 261022386
+// Faculty: Arts
+// Program: Joint Honours Mathematics & Computer Science, B.A.
+// Course: McGill Fall 2022 - COMP250
+
 public class CatCafe implements Iterable<Cat> {
 	public CatNode root;
 
@@ -57,18 +63,49 @@ public class CatCafe implements Iterable<Cat> {
 	// in the cafe with the thickest fur. Cats are sorted in descending 
 	// order based on their fur thickness. 
 	public ArrayList<Cat> buildHallOfFame(int numOfCatsToHonor) {
-		/*
-		 * TODO: ADD YOUR CODE HERE
-		 */
-		return null;
+		// Concept: iterate through the list using iterator, and send all of them to an array list.
+
+		ArrayList<Cat> allCats = new ArrayList<Cat>();
+
+		for (Cat c : this) {
+			allCats.add(c);
+		}
+
+		int amount = 0;
+
+		if (numOfCatsToHonor > allCats.size()) {
+			amount = allCats.size();
+		}
+		else {
+			amount = numOfCatsToHonor;
+		}
+
+		// Uses a lambda function to tell ArrayList.sort() to use compare cats using the return value of Integer.compare() on
+		// two cats'  fur thickness.
+		allCats.sort((cat1, cat2) -> { return Integer.compare(cat1.getFurThickness(), cat2.getFurThickness());});
+
+		// New arraylist that we will return
+		ArrayList<Cat> hallOfFame = new ArrayList<>();
+
+		for (int i = allCats.size()-1; i > allCats.size()-amount-1; i--) {
+			hallOfFame.add(allCats.get(i));
+		}
+
+		return hallOfFame;
 	}
 
 	// Returns the expected grooming cost the cafe has to incur in the next numDays days
 	public double budgetGroomingExpenses(int numDays) {
-		/*
-		 * TODO: ADD YOUR CODE HERE
-		 */
-		return 0;
+
+		double cost = 0;
+
+		for (Cat c : this) {
+			// Add the cost of this cat if it will be groomed in the next numDays
+			if (c.getDaysToNextGrooming() <= numDays) {
+				cost += c.getExpectedGroomingCost();
+			}
+		}
+		return cost;
 	}
 
 	// returns a list of list of Cats. 
@@ -76,10 +113,29 @@ public class CatCafe implements Iterable<Cat> {
 	// The cats in the list at index i need to be groomed in i weeks. 
 	// Cats in each sublist are listed in from most senior to most junior. 
 	public ArrayList<ArrayList<Cat>> getGroomingSchedule() {
-		/*
-		 * TODO: ADD YOUR CODE HERE
-		 */
-		return null;
+
+		ArrayList<ArrayList<Cat>> schedule = new ArrayList<>();
+
+		for (Cat c : this) {
+
+			int week = c.getDaysToNextGrooming() / 7;
+
+			try {
+
+				schedule.get(week).add(c);
+
+			} catch (IndexOutOfBoundsException e) {
+
+				while (schedule.size() != week+1) {
+					ArrayList<Cat> newInner = new ArrayList<>();
+					schedule.add(newInner);
+				}
+				schedule.get(week).add(c);
+			}
+
+		}
+
+		return schedule;
 	}
 
 
@@ -123,16 +179,51 @@ public class CatCafe implements Iterable<Cat> {
 			return head;
 		}
 
-
-
-
 		// remove c from the tree rooted at this and returns the root of the resulting tree
 		public CatNode retire(Cat c) {
-			// Same strategy as hire
 
-			// Step 1: remove the cat following BST properties
+			CatNode toRemove = findCat(this, c);
 
-			return null;
+			boolean underThis = true;
+
+			/* If the cat we would like to remove is not under the node on which retire() was called,
+			*  we check the whole tree. If it is still not there, then the Cat we would like to remove does not exist,
+			*  and we return the node on which retire() was called
+			*/
+			if (toRemove == null) {
+
+				// We did not find the cat under the current node, so we look in the whole tree
+				toRemove = findCat(CatCafe.this.root, c);
+
+				if (toRemove == null) {
+					// The cat does not exist anywhere in the cafe, so we return the current node
+					return this;
+				}
+				else {
+					// The node is not under the current node, but somewhere else in the tree
+					underThis = false;
+				}
+			}
+
+			// Step 1: Remove the node following BST properties.
+			CatNode head;
+			// If it is under the current node, we remove toRemove from under this node. Else, we want to search the whole tree
+			if (!underThis) {
+				head = bstRemove(CatCafe.this.root, toRemove); // returns root of whole tree
+			}
+			else {
+				head = bstRemove(this, toRemove); // returns root of current subtree
+			}
+
+			boolean bHeap = isHeap(head);
+
+			while (!bHeap) {
+				CatNode broken = findHeapBreak(head);
+				head = downHeap(broken);
+				bHeap = isHeap(head);
+			}
+
+			return head;
 		}
 
 		// find the cat with highest seniority in the tree rooted at this
@@ -173,26 +264,16 @@ public class CatCafe implements Iterable<Cat> {
 		private CatNode current;
 		private CatCafe newCafe;
 		private CatCafeIterator() {
-
-			// Finds the node with the least seniority, because that is where the iterator starts
-			current = findFirstNode(root);
-
 			// Make a shallow copy of the current tree
-			newCafe = new CatCafe(root);
 
-			// Assign it to the field
+			if (root == null) {
+				return;
+			}
 
-		}
-		// HELPER METHOD FOR CONSTRUCTOR -- CHANGE THISSSSSSSSS it has to be in the CatCafe I think
-		private CatNode findFirstNode(CatNode root) {
-			// Base case
-			if (root.junior == null) {
-				// No junior, so it is the most junior
-				return root;
-			}
-			else { // recursive step
-				return findFirstNode(root.junior);
-			}
+			newCafe = new CatCafe(CatCafe.this);
+
+			current = findCat(newCafe.root, findYoungest(newCafe.root));
+
 		}
 
 		public Cat next() {
@@ -208,20 +289,21 @@ public class CatCafe implements Iterable<Cat> {
 			// Remove the current node
 			newCafe.retire(current.catEmployee);
 
-			// Find the new minimum of our tree, only if there are still element
-			if (newCafe.root != null){
-				current = findFirstNode(newCafe.root);
+			// Find the new minimum of our tree, only if there are still elements left
+			if (newCafe.root != null) {
+				current = findCat(newCafe.root, findYoungest(newCafe.root));;
 			}
 
 			return currentCat;
 		}
 
 		public boolean hasNext() {
-			if (current.equals(root.findMostSenior())) {
+
+			if (root == null) {
 				return false;
 			}
 
-			return true;
+			return newCafe.root != null;
 		}
 
 	}
@@ -242,11 +324,6 @@ public class CatCafe implements Iterable<Cat> {
 
 
 	}
-
-
-
-
-
 
 
 	// ------------------HELPER METHODS---------------------- \\
@@ -278,7 +355,10 @@ public class CatCafe implements Iterable<Cat> {
 	// Find a Cat c in a tree rooted at CatNode root
 	private static CatNode findCat(CatNode root, Cat c) {
 
-		if (root.catEmployee.equals(c)) {
+		if (root == null) {
+			return null;
+		}
+		else if (root.catEmployee.equals(c)) {
 			return root;
 		}
 		else if (c.compareTo(root.catEmployee) > 0) { // c is the root's senior
@@ -382,9 +462,9 @@ public class CatCafe implements Iterable<Cat> {
 	}
 	private boolean isHeap(CatNode root) {
 
-		int jThicc = 0;
-		int sThicc = 0;
-		int rootThicc = 0;
+		int jThicc = -1;
+		int sThicc = -1;
+		int rootThicc;
 
 		// Base case, get fur sizes otherwise
 		if (root == null) {
@@ -398,6 +478,7 @@ public class CatCafe implements Iterable<Cat> {
 		if (root.senior != null) { sThicc = root.senior.catEmployee.getFurThickness(); }
 
 		if (rootThicc > jThicc && rootThicc > sThicc) {
+
 			// Call isHeap on left subtree
 			boolean left = isHeap(root.junior);
 			// Call isHeap on right subtree
@@ -417,7 +498,7 @@ public class CatCafe implements Iterable<Cat> {
 			rotateTree(element.parent, element);
 		} while (!(element.parent == null || element.catEmployee.getFurThickness() < element.parent.catEmployee.getFurThickness()));
 
-
+		// if we had to replace the top root, return the element
 		if (element.parent == null) {
 			return element;
 		}
@@ -428,6 +509,7 @@ public class CatCafe implements Iterable<Cat> {
 	//--------------------------------------------------------
 
 	// Helpers for CatNode.retire()
+	//--------------------------------------------------------
 	public CatNode bstRemove(CatNode root, CatNode toRemove) {
 
 		// Base Case -> when we meet toRemove
@@ -436,17 +518,19 @@ public class CatCafe implements Iterable<Cat> {
 			if (toRemove.senior == null && toRemove.junior == null) { // Case 1: the node to remove has no children
 
 				// Set the correct branch of toRemove's parent to null
-				if (isJunior(root)) { // toRemove is the junior of its parent
-					root.parent.junior = null;
-				}
-				else  { // toRemove is the senior of its parent
-					root.parent.senior = null;
+				// Only set the parent links if there is a parent (ie root isn't the head of the tree)
+				if (root.parent != null) {
+					if (isJunior(root)) { // toRemove is the junior of its parent
+						root.parent.junior = null;
+					} else { // toRemove is the senior of its parent
+						root.parent.senior = null;
+					}
 				}
 
 				// disconnect toRemove from its parent
 				root.parent = null;
 
-				// set root to null
+				// set root (toRemove node) to null
 				root = null;
 
 			}
@@ -454,11 +538,13 @@ public class CatCafe implements Iterable<Cat> {
 				// Move toRemove's junior child up to toRemove's parent's corresponding branch
 				CatNode parent = root.parent;
 
-				if (isJunior(root)) {
-					parent.junior = root.junior;
-				}
-				else {
-					parent.senior = toRemove.junior;
+				// Only set the parent links if there is one (ie root isn't the head of the tree)
+				if (parent != null) {
+					if (isJunior(root)) {
+						parent.junior = root.junior;
+					} else {
+						parent.senior = toRemove.junior;
+					}
 				}
 
 				root.junior.parent = parent;
@@ -469,11 +555,12 @@ public class CatCafe implements Iterable<Cat> {
 
 				CatNode parent = root.parent;
 
-				if (isJunior(root)) {
-					parent.junior = root.senior;
-				}
-				else {
-					parent.senior = root.senior;
+				if (root.parent != null) {
+					if (isJunior(root)) {
+						parent.junior = root.senior;
+					} else {
+						parent.senior = root.senior;
+					}
 				}
 
 				root.senior.parent = parent;
@@ -497,6 +584,7 @@ public class CatCafe implements Iterable<Cat> {
 					// It will simply take its place, no need to rearrange the tree yet
 
 					oldestCat.senior = toRemove.senior; // take the right branch of toRemove
+					toRemove.senior.parent = oldestCat;
 				}
 				else { // Case 2: oldest cat is the senior to some subtree under toRemove
 
@@ -509,6 +597,8 @@ public class CatCafe implements Iterable<Cat> {
 						// disconnect oldestCat from its parent, set the parent senior field to null
 						oldestCat.parent.senior = null;
 					}
+
+
 
 					// Step 2: Connect oldestCat to toRemove's children
 					oldestCat.junior = toRemove.junior; // junior branch
@@ -532,10 +622,10 @@ public class CatCafe implements Iterable<Cat> {
 					oldestCat.parent = toRemove.parent;
 				}
 				else {
-					// oldestCat becomes the root of the whole tree
-					this.root = oldestCat;
+					// oldestCat becomes the root of the whole tree, so it has no parent
 					oldestCat.parent = null;
 				}
+
 				root = oldestCat;
 			}
 		}
@@ -562,9 +652,94 @@ public class CatCafe implements Iterable<Cat> {
 			}
 		}
 
-
 		return root;
 	}
+
+	public CatNode downHeap(CatNode element) {
+
+		CatNode tmpNode;
+
+		// Rotate at least once, because the tree is definitely broken
+//		do {
+//			rotateTree(element.parent, element);
+//
+//			// if our element has become the top node, we don't want to rotate anymore
+//			if (element.parent == null) {
+//				break;
+//			}
+//
+//		} while (element.catEmployee.getFurThickness() > element.parent.catEmployee.getFurThickness());
+
+		rotateTree(element.parent, element);
+
+		tmpNode = element;
+
+		// go back all the way up to get the new root of the whole tree
+		while (tmpNode.parent != null) {
+			tmpNode = tmpNode.parent;
+		}
+		// It will exit when tmpNode's parent is null, so tmpNode will end up being the root of the tree
+		return tmpNode;
+	}
+
+	public CatNode findHeapBreak(CatNode root) {
+
+		// Base case:
+		if (root == null) {
+			return null;
+		}
+		else if (root.parent != null && root.parent.catEmployee.getFurThickness() < root.catEmployee.getFurThickness()) {
+
+			// We want to return the child with the greater fur thickness
+
+			if (isJunior(root) && root.parent.senior != null) {
+				// Compare against sibling (senior of parent)
+				if (root.catEmployee.getFurThickness() > root.parent.senior.catEmployee.getFurThickness()) {
+					return root;
+				}
+				else {
+					return root.parent.senior;
+				}
+
+			}
+			else if (root.parent.junior != null) {
+				// Compare against sibling (junior of parent)
+				if (root.catEmployee.getFurThickness() > root.parent.junior.catEmployee.getFurThickness()) {
+					return root;
+				}
+				else {
+					return root.parent.junior;
+				}
+			}
+
+			return root;
+		}
+		else {
+			// Recursive step
+
+			CatNode tmp1 = findHeapBreak(root.junior);
+			CatNode tmp2 = findHeapBreak(root.senior);
+
+			// We want to pass the greater of the two
+
+
+			// Make sure we aren't passing a null pointer
+			if (tmp1 != null) {
+				// if the senior is null, set root to junior
+				root = tmp1;
+			}
+			else if (tmp2 != null){
+				// if the junior is null, set root to senior
+				root = tmp2;
+			}
+			else {
+				// If the root has no children and its fur size isn't greater than its parent's, we return null
+				root = null;
+			}
+		}
+		return root;
+	}
+	//--------------------------------------------------------
 
 
 	// Helper for bstRemove
